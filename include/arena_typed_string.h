@@ -87,7 +87,7 @@ namespace spiritsaway::container
 	std::optional<std::string_view> arena_typed_value::expect_simple_value<std::string_view>() const;
 
 	template<typename... args, size_t... arg_idx>
-	std::optional<std::tuple<args...>> get_tuple_value_from_vector(const arena_typed_value** v_vec, std::index_sequence<arg_idx...>)
+	std::optional<std::tuple<args...>> get_tuple_value_from_vector(const arena_typed_value* const * v_vec, std::index_sequence<arg_idx...>)
 	{
 		if(!(v_vec[arg_idx] &&...))
 		{
@@ -110,7 +110,7 @@ namespace spiritsaway::container
 		{
 			return std::nullopt;
 		}
-		for(std::uint32_t i = 0 i< v_vec->size; i++)
+		for(std::uint32_t i = 0; i< v_vec.size; i++)
 		{
 			if(!v_vec.p_value[i])
 			{

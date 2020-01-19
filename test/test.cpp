@@ -108,12 +108,13 @@ bool test_type_value_parse()
 	return true;
 }
 
+
 int main()
 {
 
 	test_type_value_parse();
 	test_type_parse();
-
+	
 	typed_value_desc::clear_all_desc();
 
 	return 0;
