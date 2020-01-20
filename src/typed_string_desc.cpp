@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <string_util.h>
 #include <iostream>
-
+#include <sstream>
 namespace spiritsaway::container{
 	using namespace std;
 	using namespace spiritsaway::string_util;
@@ -389,6 +389,12 @@ namespace spiritsaway::container{
 		{
 			return output_stream;
 		}
+	}
+	std::string typed_value_desc::to_string() const
+	{
+		std::ostringstream buffer;
+		buffer << *this;
+		return buffer.str();
 	}
 	bool operator==(const typed_value_desc& cur, const typed_value_desc& other)
 	{

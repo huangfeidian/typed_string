@@ -44,7 +44,7 @@ namespace spiritsaway::container
 		arena_typed_value(const spiritsaway::memory::arena* arena, const typed_value_desc* in_type_desc, std::string_view in_ref_value);
 		arena_typed_value(const spiritsaway::memory::arena* arena, const typed_value_desc* in_type_desc, arena_typed_vec in_arena_typed_vec);
 		friend std::ostream& operator<<(std::ostream& output_stream, const arena_typed_value& cur_node);
-		
+		std::string to_string() const;
 		friend bool operator==(const arena_typed_value& cur, const arena_typed_value& other);
 		friend bool operator!=(const arena_typed_value& cur, const arena_typed_value& other);
 		template <typename T> 
@@ -143,44 +143,6 @@ namespace spiritsaway::container
 	{
 		bool operator()(const arena_typed_value* from, const arena_typed_value* to) const;
 	};
-    class arena_typed_value_parser
-	{
-	private:
-		spiritsaway::memory::arena& arena;
-	public:
-		const typed_value_desc* type_desc;
-		arena_typed_value_parser(spiritsaway::memory::arena& arena);
-		const arena_typed_value* match_node(std::string_view text);
-		bool match_node(std::string_view text, arena_typed_value& result);
-
-		typed_value_desc* parse_type(std::string_view type_string);
-
-		arena_typed_value* parse_value_with_type(const typed_value_desc* node_type, std::string_view text);
-		bool parse_value_with_type(const typed_value_desc* type_desc, std::string_view text, arena_typed_value& result);
-
-		template <typename T>
-		arena_typed_value* prase_node_with_number(std::string_view text)
-		{
-			std::optional<T> result_opt = cast_string_view<T>(text);
-			if (!result_opt)
-			{
-				return nullptr;
-			}
-			return new arena_typed_value(result_opt.value());
-		}
-		template <typename T>
-		bool prase_node_with_number(std::string_view text, arena_typed_value& result)
-		{
-			std::optional<T> result_opt = cast_string_view<T>(text);
-			if (!result_opt)
-			{
-				return false;
-			}
-			new(&result) arena_typed_value(result_opt.value());
-			return true;
-		}
-	private:
-		bool parse_value_with_address(const typed_value_desc* typed_desc, std::string_view text, arena_typed_value* result);
-	};
+    
 
 }

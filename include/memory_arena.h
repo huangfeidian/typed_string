@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <algorithm>
 namespace spiritsaway::memory
 {
 
@@ -14,10 +15,15 @@ namespace spiritsaway::memory
 	}
     class arena
 	{
-		static const std::uint32_t buffer_page_size = 16 * 1024;
+		const std::uint32_t buffer_page_size;
 		std::vector<char*> buffers;
 		std::uint32_t cur_buffer_used = 0;
 	public:
+		arena(std::uint32_t page_size)
+		:buffer_page_size(std::max(1024u, align_to(page_size, 1024u)))
+		{
+
+		}
 		template <typename T>
 		T* get(std::uint32_t count)
 		{
@@ -71,6 +77,10 @@ namespace spiritsaway::memory
 				auto cur_buffer_p = buffers.back();
 				return cur_buffer_p + result;
 			}
+		}
+		std::uint32_t consumption() const
+		{
+			return buffer_page_size * buffers.size();
 		}
         ~arena()
         {

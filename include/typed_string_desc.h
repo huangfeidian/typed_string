@@ -42,6 +42,7 @@ namespace spiritsaway::container
 		typed_value_desc(const tuple_detail_t& tuple_detail);
 		typed_value_desc(const list_detail_t& list_detail);
 		typed_value_desc(const ref_detail_t& ref_detail);
+		std::string to_string() const;
 		friend std::ostream& operator<<(std::ostream& output_stream, const typed_value_desc& cur_node);
 		static const typed_value_desc* get_basic_type_desc(basic_value_type in_type);
 		static const typed_value_desc* get_type_from_str(std::string_view type_string);
