@@ -82,12 +82,17 @@ namespace spiritsaway::memory
 		{
 			return buffer_page_size * buffers.size();
 		}
+		void drop()
+		{
+			for (auto one_buffer : buffers)
+			{
+				free(one_buffer);
+			}
+			buffers.clear();
+		}
         ~arena()
         {
-            for(auto one_buffer:buffers)
-            {
-                free(one_buffer);
-            }
+			drop();
             return;
         }
 	};

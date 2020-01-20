@@ -6,7 +6,7 @@
 namespace spiritsaway::container{
 	using namespace std;
 	using namespace spiritsaway::string_util;
-	std::unordered_set<typed_value_desc*> typed_value_desc::all_desc = std::unordered_set<typed_value_desc*>();
+	spiritsaway::memory::arena typed_string_desc::memory_arena(4 * 1024);
 	vector<string_view> parse_token_from_type_str(string_view type_string)
 	{
 		uint32_t begin_idx = 0;
@@ -91,18 +91,18 @@ namespace spiritsaway::container{
 			return result;
 		}
 	}
-	typed_value_desc* parse_type_from_tokens(vector<string_view> tokens)
+	typed_string_desc* parse_type_from_tokens(vector<string_view> tokens)
 	{
-		static unordered_map<string_view, basic_value_type> str_to_type_map = {
-			{"comment", basic_value_type::comment},
-			{"str", basic_value_type::string},
-			{"bool", basic_value_type::number_bool},
-			{"uint32", basic_value_type::number_u32},
-			{"int", basic_value_type::number_32},
-			{"uint64", basic_value_type::number_u64},
-			{"int64", basic_value_type::number_64},
-			{"float", basic_value_type::number_float},
-			{"double", basic_value_type::number_double},
+		static unordered_map<string_view, typed_string_desc*> str_to_type_map = {
+			{"comment", new typed_string_desc(basic_value_type::comment)},
+			{"str", new typed_string_desc(basic_value_type::string)},
+			{"bool", new typed_string_desc(basic_value_type::number_bool)},
+			{"uint32", new typed_string_desc(basic_value_type::number_u32)},
+			{"int", new typed_string_desc(basic_value_type::number_32)},
+			{"uint64", new typed_string_desc(basic_value_type::number_u64)},
+			{"int64", new typed_string_desc(basic_value_type::number_64)},
+			{"float", new typed_string_desc(basic_value_type::number_float)},
+			{"double", new typed_string_desc(basic_value_type::number_double)},
 		};
 		if(tokens.empty())
 		{
@@ -113,7 +113,8 @@ namespace spiritsaway::container{
 			auto map_iter = str_to_type_map.find(tokens[0]);
 			if(map_iter != str_to_type_map.end())
 			{
-				return new typed_value_desc(map_iter->second);
+				
+				return map_iter->second;
 			}
 			else
 			{
@@ -143,9 +144,9 @@ namespace spiritsaway::container{
 				{
 					return nullptr;
 				}
-				auto result = new typed_value_desc(basic_value_type::ref_id);
+				typed_string_desc* result = typed_string_desc::memory_arena.get<typed_string_desc>(1);
+				new(result) typed_string_desc(basic_value_type::ref_id);
 				result->_type_detail = make_pair(cur_worksheet, cur_type_desc);
-				typed_value_desc::all_desc.insert(result);
 				return result;
 			}
 			else if(tokens[0] == string_view("list") || tokens[0] == string_view("tuple"))
@@ -221,9 +222,8 @@ namespace spiritsaway::container{
 					}
 					else
 					{
-
-						auto result = new typed_value_desc(make_tuple(temp_type_result, repeat_times.value(), splitor));
-						typed_value_desc::all_desc.insert(result);
+						typed_string_desc* result = typed_string_desc::memory_arena.get<typed_string_desc>(1);
+						new(result) typed_string_desc(make_tuple(temp_type_result, repeat_times.value(), splitor));
 						return result;
 					}
 
@@ -231,7 +231,7 @@ namespace spiritsaway::container{
 				else
 				{
 					//tuple(xx, xx, seperator)
-					vector<typed_value_desc*> type_vec;
+					vector<typed_string_desc*> type_vec;
 					char cur_splitor = ',';
 					auto splitor_info = grouped_tokens.back();
 					if(splitor_info.size() == 1 && splitor_info[0].size() == 1)
@@ -252,8 +252,8 @@ namespace spiritsaway::container{
 						}
 						
 					}
-					auto result = new typed_value_desc(make_pair(type_vec, cur_splitor));
-					typed_value_desc::all_desc.insert(result);
+					typed_string_desc* result = typed_string_desc::memory_arena.get<typed_string_desc>(1);
+					new(result) typed_string_desc(make_pair(type_vec, cur_splitor));
 					return result;
 				}
 
@@ -263,7 +263,7 @@ namespace spiritsaway::container{
 	}
 	
 	
-	optional<typed_value_desc::list_detail_t> typed_value_desc::get_list_detail_t() const
+	optional<typed_string_desc::list_detail_t> typed_string_desc::get_list_detail_t() const
 	{
 		if(_type != basic_value_type::list)
 		{
@@ -271,11 +271,11 @@ namespace spiritsaway::container{
 		}
 		else
 		{
-			return std::get<typed_value_desc::list_detail_t>(_type_detail);
+			return std::get<typed_string_desc::list_detail_t>(_type_detail);
 		}
 	}
 
-	optional<typed_value_desc::ref_detail_t> typed_value_desc::get_ref_detail_t() const
+	optional<typed_string_desc::ref_detail_t> typed_string_desc::get_ref_detail_t() const
 	{
 		if(_type != basic_value_type::ref_id)
 		{
@@ -283,11 +283,11 @@ namespace spiritsaway::container{
 		}
 		else
 		{
-			return std::get<typed_value_desc::ref_detail_t>(_type_detail);
+			return std::get<typed_string_desc::ref_detail_t>(_type_detail);
 		}
 	}
 
-	optional<typed_value_desc::tuple_detail_t> typed_value_desc::get_tuple_detail_t() const
+	optional<typed_string_desc::tuple_detail_t> typed_string_desc::get_tuple_detail_t() const
 	{
 		if(_type != basic_value_type::tuple)
 		{
@@ -295,35 +295,35 @@ namespace spiritsaway::container{
 		}
 		else
 		{
-			return std::get<typed_value_desc::tuple_detail_t>(_type_detail);
+			return std::get<typed_string_desc::tuple_detail_t>(_type_detail);
 		}
 	}
 
-	typed_value_desc::typed_value_desc()
+	typed_string_desc::typed_string_desc()
 	{
 		_type = basic_value_type::comment;
 	}
-	typed_value_desc::typed_value_desc(basic_value_type in_type)
+	typed_string_desc::typed_string_desc(basic_value_type in_type)
 	{
 		_type = in_type;
 	}
-	typed_value_desc::typed_value_desc(const typed_value_desc::tuple_detail_t& tuple_detail):
+	typed_string_desc::typed_string_desc(const typed_string_desc::tuple_detail_t& tuple_detail):
 		_type(basic_value_type::tuple), _type_detail(tuple_detail)
 	{
 
 	}
-	typed_value_desc::typed_value_desc(const typed_value_desc::list_detail_t& list_detail):
+	typed_string_desc::typed_string_desc(const typed_string_desc::list_detail_t& list_detail):
 		_type(basic_value_type::list), _type_detail(list_detail)
 	{
 
 	}
-	typed_value_desc::typed_value_desc(const typed_value_desc::ref_detail_t& ref_detail)
+	typed_string_desc::typed_string_desc(const typed_string_desc::ref_detail_t& ref_detail)
 		:_type(basic_value_type::ref_id), _type_detail(ref_detail)
 	{
 
 	}
 
-	ostream& operator<<(ostream& output_stream, const typed_value_desc& cur_type)
+	ostream& operator<<(ostream& output_stream, const typed_string_desc& cur_type)
 	{
 		static unordered_map<basic_value_type, string_view> type_to_string = {
 			{basic_value_type::comment, "comment"},
@@ -347,7 +347,7 @@ namespace spiritsaway::container{
 		output_stream<<temp_iter->second;
 		if(cur_type._type == basic_value_type::ref_id)
 		{
-			auto temp_detail = std::get<typed_value_desc::ref_detail_t>(cur_type._type_detail);
+			auto temp_detail = std::get<typed_string_desc::ref_detail_t>(cur_type._type_detail);
 			string_view cur_worksheet, cur_ref_type;
 			std::tie(cur_worksheet, cur_ref_type) = temp_detail;
 			output_stream<<"(" << cur_worksheet<<", "<<cur_ref_type<<")";
@@ -355,7 +355,7 @@ namespace spiritsaway::container{
 		}
 		else if(cur_type._type == basic_value_type::tuple)
 		{
-			auto temp_detail = std::get<typed_value_desc::tuple_detail_t>(cur_type._type_detail);
+			auto temp_detail = std::get<typed_string_desc::tuple_detail_t>(cur_type._type_detail);
 			output_stream<<"(";
 
 			for(std::uint32_t i = 0; i< temp_detail.first.size(); i++)
@@ -375,7 +375,7 @@ namespace spiritsaway::container{
 		}
 		else if(cur_type._type == basic_value_type::list)
 		{
-			auto temp_detail = std::get<typed_value_desc::list_detail_t>(cur_type._type_detail);
+			auto temp_detail = std::get<typed_string_desc::list_detail_t>(cur_type._type_detail);
 			output_stream<<"("<<*std::get<0>(temp_detail)<<", "<<std::get<1>(temp_detail);
 			auto sep = std::get<2>(temp_detail);
 			if(sep != ',')
@@ -390,13 +390,13 @@ namespace spiritsaway::container{
 			return output_stream;
 		}
 	}
-	std::string typed_value_desc::to_string() const
+	std::string typed_string_desc::to_string() const
 	{
 		std::ostringstream buffer;
 		buffer << *this;
 		return buffer.str();
 	}
-	bool operator==(const typed_value_desc& cur, const typed_value_desc& other)
+	bool operator==(const typed_string_desc& cur, const typed_string_desc& other)
 	{
 		if(cur._type != other._type)
 		{
@@ -420,8 +420,8 @@ namespace spiritsaway::container{
 				{
 					return false;
 				}
-				auto cur_detail = std::get<typed_value_desc::list_detail_t>(cur._type_detail);
-				auto other_detail = std::get<typed_value_desc::list_detail_t>(other._type_detail);
+				auto cur_detail = std::get<typed_string_desc::list_detail_t>(cur._type_detail);
+				auto other_detail = std::get<typed_string_desc::list_detail_t>(other._type_detail);
 				if(std::get<1>(cur_detail) != std::get<1>(other_detail))
 				{
 					return false;
@@ -442,8 +442,8 @@ namespace spiritsaway::container{
 				{
 					return false;
 				}
-				auto cur_detail = std::get<typed_value_desc::ref_detail_t>(cur._type_detail);
-				auto other_detail = std::get<typed_value_desc::ref_detail_t>(other._type_detail);
+				auto cur_detail = std::get<typed_string_desc::ref_detail_t>(cur._type_detail);
+				auto other_detail = std::get<typed_string_desc::ref_detail_t>(other._type_detail);
 				return cur_detail == other_detail;
 			}
 				
@@ -453,8 +453,8 @@ namespace spiritsaway::container{
 				{
 					return false;
 				}
-				auto cur_detail = std::get<typed_value_desc::tuple_detail_t>(cur._type_detail);
-				auto other_detail = std::get<typed_value_desc::tuple_detail_t>(other._type_detail);
+				auto cur_detail = std::get<typed_string_desc::tuple_detail_t>(cur._type_detail);
+				auto other_detail = std::get<typed_string_desc::tuple_detail_t>(other._type_detail);
 				if(cur_detail.first.size() != other_detail.first.size())
 				{
 					return false;
@@ -476,22 +476,22 @@ namespace spiritsaway::container{
 				return false;
 		}
 	}
-	bool operator!=(const typed_value_desc& cur, const typed_value_desc& other)
+	bool operator!=(const typed_string_desc& cur, const typed_string_desc& other)
 	{
 		return !(cur == other);
 	}
-    const typed_value_desc* typed_value_desc::get_basic_type_desc(basic_value_type in_type)
+    const typed_string_desc* typed_string_desc::get_basic_type_desc(basic_value_type in_type)
 	{
-		static std::vector<typed_value_desc*> result = {
-			new typed_value_desc(basic_value_type::comment),
-			new typed_value_desc(basic_value_type::string),
-			new typed_value_desc(basic_value_type::number_bool),
-			new typed_value_desc(basic_value_type::number_u32),
-			new typed_value_desc(basic_value_type::number_32),
-			new typed_value_desc(basic_value_type::number_u64),
-			new typed_value_desc(basic_value_type::number_64),
-			new typed_value_desc(basic_value_type::number_float),
-			new typed_value_desc(basic_value_type::number_double),
+		static std::vector<typed_string_desc*> result = {
+			new typed_string_desc(basic_value_type::comment),
+			new typed_string_desc(basic_value_type::string),
+			new typed_string_desc(basic_value_type::number_bool),
+			new typed_string_desc(basic_value_type::number_u32),
+			new typed_string_desc(basic_value_type::number_32),
+			new typed_string_desc(basic_value_type::number_u64),
+			new typed_string_desc(basic_value_type::number_64),
+			new typed_string_desc(basic_value_type::number_float),
+			new typed_string_desc(basic_value_type::number_double),
 		};
 
 		if (static_cast<uint32_t>(in_type) > static_cast<uint32_t>(basic_value_type::number_double))
@@ -503,7 +503,7 @@ namespace spiritsaway::container{
 			return result[static_cast<uint32_t>(in_type)];
 		}
 	}
-    const typed_value_desc* typed_value_desc::get_type_from_str(string_view type_string)
+    const typed_string_desc* typed_string_desc::get_type_from_str(string_view type_string)
 	{
 		auto all_tokens = parse_token_from_type_str(type_string);
 		auto result = parse_type_from_tokens(all_tokens);
@@ -524,7 +524,7 @@ namespace spiritsaway::container{
 			return result;
 		}
 	}
-	bool typed_value_desc::check_delimiter_conflict(std::vector<char>& pre_delimiter) const
+	bool typed_string_desc::check_delimiter_conflict(std::vector<char>& pre_delimiter) const
 	{
 		switch (_type)
 		{
@@ -578,18 +578,14 @@ namespace spiritsaway::container{
 			return false;
 		}
 	}
-	typed_value_desc::~typed_value_desc()
+	typed_string_desc::~typed_string_desc()
 	{
 		return;
 	}
-	std::uint32_t typed_value_desc::clear_all_desc()
+	std::uint32_t typed_string_desc::clear_all_desc()
 	{
-		auto result = all_desc.size();
-		for (auto one_item : all_desc)
-		{
-			delete one_item;
-		}
-		all_desc.clear();
+		auto result = typed_string_desc::memory_arena.consumption();
+		typed_string_desc::memory_arena.drop();
 		return result;
 	}
 }

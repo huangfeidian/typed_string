@@ -61,7 +61,7 @@ namespace spiritsaway::container
 	{
 
 	}
-	arena_typed_value* arena_typed_string_parser::parse_value_with_type(const typed_value_desc* node_type, string_view text)
+	arena_typed_value* arena_typed_string_parser::parse_value_with_type(const typed_string_desc* node_type, string_view text)
 	{
 		arena_typed_value* temp_result = arena.get<arena_typed_value>(1);
 		if (parse_value_with_address(node_type, text, temp_result))
@@ -73,12 +73,12 @@ namespace spiritsaway::container
 			return nullptr;
 		}
 	}
-	bool arena_typed_string_parser::parse_value_with_type(const typed_value_desc* node_type, string_view text, arena_typed_value& result)
+	bool arena_typed_string_parser::parse_value_with_type(const typed_string_desc* node_type, string_view text, arena_typed_value& result)
 	{
 		return parse_value_with_address(node_type, text, &result);
 	}
 
-	bool arena_typed_string_parser::parse_value_with_address(const typed_value_desc* node_type, string_view text, arena_typed_value* result)
+	bool arena_typed_string_parser::parse_value_with_address(const typed_string_desc* node_type, string_view text, arena_typed_value* result)
 	{
 		text.remove_prefix(min(text.find_first_not_of(" "), text.size()));
 		text.remove_suffix(text.size() - min(text.find_last_not_of(" ") + 1, text.size()));
@@ -171,7 +171,7 @@ namespace spiritsaway::container
 			}
 		case basic_value_type::ref_id:
 		{
-			auto cur_ref_detail = std::get<typed_value_desc::ref_detail_t>(node_type->_type_detail);
+			auto cur_ref_detail = std::get<typed_string_desc::ref_detail_t>(node_type->_type_detail);
 			if (cur_ref_detail.second == "str"sv)
 			{
 				new(result) arena_typed_value(&arena, node_type, text);
@@ -185,7 +185,7 @@ namespace spiritsaway::container
 		}
 		case basic_value_type::tuple:
 		{
-			auto cur_tuple_detail = std::get<typed_value_desc::tuple_detail_t>(node_type->_type_detail);
+			auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(node_type->_type_detail);
 			char sep = cur_tuple_detail.second;
 			auto type_list = cur_tuple_detail.first;
 			text = strip_parenthesis(text);
@@ -219,10 +219,10 @@ namespace spiritsaway::container
 		}
 		case basic_value_type::list:
 		{
-			auto cur_list_detail = std::get<typed_value_desc::list_detail_t>(node_type->_type_detail);
+			auto cur_list_detail = std::get<typed_string_desc::list_detail_t>(node_type->_type_detail);
 			uint32_t list_size = std::get<uint32_t>(cur_list_detail);
 			char sep = std::get<char>(cur_list_detail);
-			auto unit_type = std::get<typed_value_desc *>(cur_list_detail);
+			auto unit_type = std::get<typed_string_desc *>(cur_list_detail);
 			text = strip_parenthesis(text);
 			auto tokens = split_string(text, sep);
 			vector<arena_typed_value *> sub_values;

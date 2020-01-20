@@ -40,7 +40,7 @@ namespace spiritsaway::container
 				return output_stream<<cur_value.v_text;
 			case basic_value_type::list:
 			{
-				auto cur_list_detail = std::get<typed_value_desc::list_detail_t>(cur_value.type_desc->_type_detail);
+				auto cur_list_detail = std::get<typed_string_desc::list_detail_t>(cur_value.type_desc->_type_detail);
 				char sep = std::get<2>(cur_list_detail);
 				output_stream<<"(";
 				int cur_size = cur_value.v_vec.size;
@@ -56,7 +56,7 @@ namespace spiritsaway::container
 			}
 			case basic_value_type::tuple:
 			{
-				auto cur_tuple_detail = std::get<typed_value_desc::tuple_detail_t>(cur_value.type_desc->_type_detail);
+				auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(cur_value.type_desc->_type_detail);
 				char sep = cur_tuple_detail.second;
 				output_stream<<"(";
 				int cur_size = cur_value.v_vec.size;
@@ -89,61 +89,61 @@ namespace spiritsaway::container
 
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, bool in_value)
-		:type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::number_bool))
+		:type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::number_bool))
 		, arena(arena)
 	{
 		v_bool = in_value;
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, uint32_t in_value) 
-		: type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::number_u32))
+		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::number_u32))
 		, arena(arena)
 	{
 		v_uint32 = in_value;
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, int32_t in_value)
-		: type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::number_32))
+		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::number_32))
 		, arena(arena)
 	{
 		v_int32 = in_value;
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, uint64_t in_value)
-		: type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::number_u64))
+		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::number_u64))
 		, arena(arena)
 	{
 		v_uint64 = in_value;
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, int64_t in_value)
-		: type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::number_64))
+		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::number_64))
 		, arena(arena)
 	{
 		v_int64 = in_value;
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, float in_value)
-		: type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::number_float))
+		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::number_float))
 		, arena(arena)
 	{
 		v_float = in_value;
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, double in_value)
-		: type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::number_double))
+		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::number_double))
 		, arena(arena)
 	{
 		v_double = in_value;
 	}
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, string_view in_value)
-		: type_desc(typed_value_desc::get_basic_type_desc(basic_value_type::string))
+		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::string))
 		, arena(arena)
 	{
 		v_text = in_value;
 	}
-	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, const typed_value_desc* in_type_desc, string_view in_value)
+	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, string_view in_value)
 		: type_desc(in_type_desc)
 		, arena(arena)
 		, v_text(in_value)
 	{
 	}
 
-	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, const typed_value_desc* in_type_desc, arena_typed_vec in_value)
+	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, arena_typed_vec in_value)
 		: type_desc(in_type_desc)
 		, arena(arena)
 		, v_vec(in_value)

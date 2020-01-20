@@ -6,7 +6,7 @@
 #include <variant>
 #include <optional>
 #include <ostream>
-#include <unordered_set>
+#include "memory_arena.h"
 
 namespace spiritsaway::container
 {
@@ -29,33 +29,34 @@ namespace spiritsaway::container
 
 	};
 	
-	struct typed_value_desc
+	struct typed_string_desc
 	{
 		using ref_detail_t = std::pair<std::string_view, std::string_view>;
-		using list_detail_t = std::tuple<typed_value_desc*, std::uint32_t, char>;// detail_type length <seperator>
-		using tuple_detail_t = std::pair<std::vector<typed_value_desc*>, char>;//<type1, type2, type3> seperator
+		using list_detail_t = std::tuple<typed_string_desc*, std::uint32_t, char>;// detail_type length <seperator>
+		using tuple_detail_t = std::pair<std::vector<typed_string_desc*>, char>;//<type1, type2, type3> seperator
 		basic_value_type _type;
 		std::variant<ref_detail_t, tuple_detail_t, list_detail_t> _type_detail;
-		typed_value_desc();
+		typed_string_desc();
 		
-		typed_value_desc(basic_value_type in_type);
-		typed_value_desc(const tuple_detail_t& tuple_detail);
-		typed_value_desc(const list_detail_t& list_detail);
-		typed_value_desc(const ref_detail_t& ref_detail);
+		typed_string_desc(basic_value_type in_type);
+		typed_string_desc(const tuple_detail_t& tuple_detail);
+		typed_string_desc(const list_detail_t& list_detail);
+		typed_string_desc(const ref_detail_t& ref_detail);
 		std::string to_string() const;
-		friend std::ostream& operator<<(std::ostream& output_stream, const typed_value_desc& cur_node);
-		static const typed_value_desc* get_basic_type_desc(basic_value_type in_type);
-		static const typed_value_desc* get_type_from_str(std::string_view type_string);
-		friend bool operator==(const typed_value_desc& cur, const typed_value_desc& other);
-		friend bool operator!=(const typed_value_desc& cur, const typed_value_desc& other);
+		friend std::ostream& operator<<(std::ostream& output_stream, const typed_string_desc& cur_node);
+		static const typed_string_desc* get_basic_type_desc(basic_value_type in_type);
+		static const typed_string_desc* get_type_from_str(std::string_view type_string);
+		friend bool operator==(const typed_string_desc& cur, const typed_string_desc& other);
+		friend bool operator!=(const typed_string_desc& cur, const typed_string_desc& other);
 		std::optional<list_detail_t> get_list_detail_t() const;
 		std::optional<ref_detail_t> get_ref_detail_t() const;
 		std::optional<tuple_detail_t> get_tuple_detail_t() const;
-		typed_value_desc(const typed_value_desc& other) = delete;
-		typed_value_desc& operator=(const typed_value_desc& other) = delete;
-		~typed_value_desc();
+		typed_string_desc(const typed_string_desc& other) = delete;
+		typed_string_desc& operator=(const typed_string_desc& other) = delete;
+		~typed_string_desc();
 		bool check_delimiter_conflict(std::vector<char>& pre_delimiter) const;
-		static std::unordered_set<typed_value_desc*> all_desc;
+		
+		static spiritsaway::memory::arena memory_arena;
 		static std::uint32_t clear_all_desc();
 	};
 }
