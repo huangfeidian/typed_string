@@ -59,7 +59,7 @@ bool test_type_parse()
 bool test_type_value_parse()
 {
 	memory::arena cur_arena(4 * 1024);
-	arena_typed_value_parser cur_parser(cur_arena);
+	arena_typed_string_parser cur_parser(cur_arena);
 	unordered_map<string, vector<string>> typed_values = {
 		{"int", {"0", "1", "-1", "-1314598", "314159"}},
 		{"uint32", {"0", "1", "10", "314159"}},

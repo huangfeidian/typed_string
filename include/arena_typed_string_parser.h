@@ -3,13 +3,13 @@
 
 namespace spiritsaway::container
 {
-    class arena_typed_value_parser
+    class arena_typed_string_parser
 	{
 	private:
 		spiritsaway::memory::arena& arena;
 	public:
 		const typed_value_desc* type_desc;
-		arena_typed_value_parser(spiritsaway::memory::arena& arena);
+		arena_typed_string_parser(spiritsaway::memory::arena& arena);
 		const arena_typed_value* match_node(std::string_view text);
 		bool match_node(std::string_view text, arena_typed_value& result);
 

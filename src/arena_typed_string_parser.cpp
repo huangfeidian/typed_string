@@ -56,12 +56,12 @@ namespace spiritsaway::container
 {
     using namespace spiritsaway::string_util;
 
-    arena_typed_value_parser::arena_typed_value_parser(spiritsaway::memory::arena& in_arena)
+    arena_typed_string_parser::arena_typed_string_parser(spiritsaway::memory::arena& in_arena)
 		:arena(in_arena)
 	{
 
 	}
-	arena_typed_value* arena_typed_value_parser::parse_value_with_type(const typed_value_desc* node_type, string_view text)
+	arena_typed_value* arena_typed_string_parser::parse_value_with_type(const typed_value_desc* node_type, string_view text)
 	{
 		arena_typed_value* temp_result = arena.get<arena_typed_value>(1);
 		if (parse_value_with_address(node_type, text, temp_result))
@@ -73,12 +73,12 @@ namespace spiritsaway::container
 			return nullptr;
 		}
 	}
-	bool arena_typed_value_parser::parse_value_with_type(const typed_value_desc* node_type, string_view text, arena_typed_value& result)
+	bool arena_typed_string_parser::parse_value_with_type(const typed_value_desc* node_type, string_view text, arena_typed_value& result)
 	{
 		return parse_value_with_address(node_type, text, &result);
 	}
 
-	bool arena_typed_value_parser::parse_value_with_address(const typed_value_desc* node_type, string_view text, arena_typed_value* result)
+	bool arena_typed_string_parser::parse_value_with_address(const typed_value_desc* node_type, string_view text, arena_typed_value* result)
 	{
 		text.remove_prefix(min(text.find_first_not_of(" "), text.size()));
 		text.remove_suffix(text.size() - min(text.find_last_not_of(" ") + 1, text.size()));
@@ -274,12 +274,12 @@ namespace spiritsaway::container
 			return false;
 		}
 	}
-	const arena_typed_value* arena_typed_value_parser::match_node(string_view text)
+	const arena_typed_value* arena_typed_string_parser::match_node(string_view text)
 	{
-		return arena_typed_value_parser::parse_value_with_type(type_desc, text);
+		return arena_typed_string_parser::parse_value_with_type(type_desc, text);
 	}
-	bool arena_typed_value_parser::match_node(string_view text, arena_typed_value& result)
+	bool arena_typed_string_parser::match_node(string_view text, arena_typed_value& result)
 	{
-		return arena_typed_value_parser::parse_value_with_type(type_desc, text, result);
+		return arena_typed_string_parser::parse_value_with_type(type_desc, text, result);
 	}
 }
