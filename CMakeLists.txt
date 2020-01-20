@@ -21,8 +21,8 @@ FILE(GLOB_RECURSE TYPED_STRING_SRC_LIST ${CMAKE_SOURCE_DIR}/src/*.cpp)
 add_library(${CMAKE_PROJECT_NAME} ${TYPED_STRING_SRC_LIST})
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC $<INSTALL_INTERFACE:include>)
 
-add_executable(typed_string_test ${CMAKE_SOURCE_DIR}/test/test.cpp)
-target_link_libraries(typed_string_test ${CMAKE_PROJECT_NAME})
+add_executable(parse_test ${CMAKE_SOURCE_DIR}/test/parse_test.cpp)
+target_link_libraries(parse_test ${CMAKE_PROJECT_NAME})
 
 foreach(p LIB INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
