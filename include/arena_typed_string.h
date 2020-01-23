@@ -41,7 +41,8 @@ namespace spiritsaway::container
 		arena_typed_value(const spiritsaway::memory::arena* arena, std::string_view in_value);
 		arena_typed_value(const spiritsaway::memory::arena* arena, float in_value);
 		arena_typed_value(const spiritsaway::memory::arena* arena, double in_value);
-		arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, std::string_view in_ref_value);
+		arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, std::string_view in_value);
+		arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, int in_value);
 		arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, arena_typed_vec in_arena_typed_vec);
 		friend std::ostream& operator<<(std::ostream& output_stream, const arena_typed_value& cur_node);
 		std::string to_string() const;

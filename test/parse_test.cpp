@@ -21,22 +21,23 @@ bool test_type_parse()
         "int64",
         "float",
         "double",
-        "ref(colors, str)",
-        "ref(rgb, str)",
+        "choice_str(red, blue)",
+		"choice_int(0,1,2)",
+		"choice_str(red, blue , green )",
         "list(int, 2)",
         "list(str, 2, #)",
         "list(str, 0, #)"
         "tuple(int, str)",
         "tuple(str, str, #)",
-        "list(ref(color, str), 3)",
+        "list(choice_int(0,1,2), 3)",
         "list(list(int, 3), 3, #)",
         "list(list(int, 0), 3, #)",
         "list(list(int, 0), 0, #)",
         "tuple(tuple(int, int), tuple(str, str), #)",
         "tuple(tuple(int, int), tuple(str, str), #)",
         "tuple(list(int, 3), list(str, 3), #)",
-        "tuple(ref(color, str), ref(color, str), ref(color, str))",
-        "list(tuple(ref(color, str), ref(color, str), #), 3, ?)",
+        "tuple(choice_str(red, blue, green), choice_str(red, blue, green), choice_str(red, blue, green))",
+        "list(tuple(choice_int(0,1,2), choice_int(0,1,2), #), 3, ?)",
     };
 	bool failed = false;
     for(const auto& i : valid_inputs)
@@ -67,11 +68,11 @@ bool test_type_value_parse()
 		{"int64", {"0", "-1", "1", "20000000000000", "-20000000000000"}},
 		{"float", {"0.0", "-0.0", "1.0", "-1.0", "3.14159", "-3141519"}},
 		{"double", {"0.0", "-0.0", "3.141592657385", "-3.141592657384"}},
-		{"ref(colors, str)", {"rgb1", "rgb2", "rgb3"}},
-		{ "ref(colors, str)",{ "rgb1", "rgb2", "rgb3" } },
+		{"choice_str(red, blue, green)", {"blue", "green", "red"}},
+		{ "choice_int(0,1,2,3)",{ "1", "2", "3" } },
 		{"tuple(int, str)", {"(3, 5)", "(4, hehe)", "(5, -1)", "(0, fail)"}},
 		{"tuple(str, str, #)", {"(wala , #hehe)", "(wawa,#hehe)", "( wawa, # hehe)", "(	wawa	, #    hehe )"} },
-		{"list(ref(color, str), 3)", {"(rgb1,rgb2, rgb3)", "(	rgb1 , rgb 2, rgb 3)"} },
+		{"list(choice_str(red, blue, green), 3)", {"(red,red, red)", "(	blue , blue, green)"} },
 		{"list(int, 3)", {"(1,2,3)"}},
 		{"list(list(int, 3), 3, #)", {"((1,2,3)#(2,3,4)#(3,4,5))"}},
 		{"list(list(int, 0), 3, #)", {"((1)#(1,2)#(1,2,3))"}},
@@ -79,8 +80,8 @@ bool test_type_value_parse()
 		{"tuple(tuple(int,int), tuple(str,str), #)", {"((1,2)#(h, k))"}},
 		{"tuple(tuple(int,int), tuple(str, str), #)", {"((1,2)#(h,k))"}},
 		{"tuple(list(int, 3), list(int, 3), #)", {"((1,2,3)#(2,3,4))"}},
-		{"tuple(ref(color, str), ref(color, str), ref(color, str))", {"(rgb1, rgb2, rgb3)"}},
-		{"list(tuple(ref(color, str), ref(color, str), #),3,?)", {"((rgb1#rgb2)?(rgb1#rgb2)?(rgb1#rgb2))"}}
+		{"tuple(choice_int(0,1), choice_int(2, 3), choice_int(4, 5))", {"(1, 2, 5)"}},
+		{"list(tuple(choice_int(0,1), choice_int(1,2), #),3,?)", {"((1#1)?(0#1)?(1#2))"}}
 	};
 	bool failed = false;
 	for (const auto& i : typed_values)

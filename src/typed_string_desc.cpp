@@ -67,7 +67,7 @@ namespace spiritsaway::container{
 			result.push_back(tokens[begin_idx]);
 			if(unmatched == 0)
 			{
-				if(tokens[begin_idx] == "list"sv || tokens[begin_idx] == "tuple"sv || tokens[begin_idx] == "ref"sv)
+				if(tokens[begin_idx] == "list"sv || tokens[begin_idx] == "tuple"sv || tokens[begin_idx] == "choice_str"sv || tokens[begin_idx] == "choice_int"sv)
 				{
 					begin_idx += 1;
 				}
@@ -123,30 +123,64 @@ namespace spiritsaway::container{
 		}
 		else
 		{
-			if(tokens[0] == string_view("ref"))
+			if(tokens[0] == string_view("choice_int"))
 			{
-				// ref(worksheet, int) ref(worksheet, str) 
+				//choice_int(1,2,3)
 				if(tokens[1] != string_view("(") || tokens.back() != string_view(")"))
 				{
 					return nullptr;
 				}
-				auto cur_type_desc = tokens[tokens.size() - 2];
-				if(cur_type_desc != "str"sv && cur_type_desc != "int"sv)
+				std::vector<int> choice_values;
+				for(std::size_t i = 2; i< tokens.size() - 1; i++)
+				{
+					auto opt_value = cast_string_view<int>(tokens[i]);
+					if(!opt_value)
+					{
+						return nullptr;
+					}
+					choice_values.push_back(opt_value.value());
+				}
+				if(choice_values.empty())
 				{
 					return nullptr;
 				}
-				string_view cur_worksheet;
-				if(tokens.size() == 5)
+				auto int_buffer = typed_string_desc::memory_arena.get<int>(choice_values.size());
+				for(std::size_t i = 0; i< choice_values.size(); i++)
 				{
-					cur_worksheet = tokens[2];
-				}
-				else
-				{
-					return nullptr;
+					int_buffer[i] = choice_values[i];
 				}
 				typed_string_desc* result = typed_string_desc::memory_arena.get<typed_string_desc>(1);
-				new(result) typed_string_desc(basic_value_type::ref_id);
-				result->_type_detail = make_pair(cur_worksheet, cur_type_desc);
+				new(result) typed_string_desc(basic_value_type::choice_int);
+				result->_type_detail = make_pair(int_buffer, choice_values.size());
+				return result;
+			}
+			else if(tokens[0] == "choice_str"sv)
+			{
+				//choice_int(red,blue,green)
+				if(tokens[1] != string_view("(") || tokens.back() != string_view(")"))
+				{
+					return nullptr;
+				}
+				std::vector<string_view> choice_values;
+				for(std::size_t i = 2; i< tokens.size() - 1; i++)
+				{
+					auto p_str_view = typed_string_desc::memory_arena.get<char>(tokens[i].size());
+					std::copy(tokens[i].begin(), tokens[i].end(), p_str_view);
+					auto new_str_view = std::string_view(p_str_view, tokens[i].size());
+					choice_values.push_back(new_str_view);
+				}
+				if(choice_values.empty())
+				{
+					return nullptr;
+				}
+				auto sv_buffer = typed_string_desc::memory_arena.get<string_view>(choice_values.size());
+				for(std::size_t i = 0; i< choice_values.size(); i++)
+				{
+					sv_buffer[i] = choice_values[i];
+				}
+				typed_string_desc* result = typed_string_desc::memory_arena.get<typed_string_desc>(1);
+				new(result) typed_string_desc(basic_value_type::choice_str);
+				result->_type_detail = make_pair(sv_buffer, choice_values.size());
 				return result;
 			}
 			else if(tokens[0] == string_view("list") || tokens[0] == string_view("tuple"))
@@ -252,8 +286,14 @@ namespace spiritsaway::container{
 						}
 						
 					}
+					if (type_vec.empty())
+					{
+						return nullptr;
+					}
+					auto p_vec = typed_string_desc::memory_arena.get< typed_string_desc*>(type_vec.size());
+					std::copy(type_vec.cbegin(), type_vec.cend(), p_vec);
 					typed_string_desc* result = typed_string_desc::memory_arena.get<typed_string_desc>(1);
-					new(result) typed_string_desc(make_pair(type_vec, cur_splitor));
+					new(result) typed_string_desc(make_tuple(p_vec, type_vec.size(), cur_splitor));
 					return result;
 				}
 
@@ -275,15 +315,27 @@ namespace spiritsaway::container{
 		}
 	}
 
-	optional<typed_string_desc::ref_detail_t> typed_string_desc::get_ref_detail_t() const
+	optional<typed_string_desc::choice_int_detail_t> typed_string_desc::get_choice_int_detail_t() const
 	{
-		if(_type != basic_value_type::ref_id)
+		if(_type != basic_value_type::choice_int)
 		{
 			return nullopt;
 		}
 		else
 		{
-			return std::get<typed_string_desc::ref_detail_t>(_type_detail);
+			return std::get<typed_string_desc::choice_int_detail_t>(_type_detail);
+		}
+	}
+
+	optional<typed_string_desc::choice_str_detail_t> typed_string_desc::get_choice_str_detail_t() const
+	{
+		if(_type != basic_value_type::choice_str)
+		{
+			return nullopt;
+		}
+		else
+		{
+			return std::get<typed_string_desc::choice_str_detail_t>(_type_detail);
 		}
 	}
 
@@ -312,16 +364,22 @@ namespace spiritsaway::container{
 	{
 
 	}
+	typed_string_desc::typed_string_desc(const typed_string_desc::choice_int_detail_t& choice_int_detail):
+		_type(basic_value_type::choice_int), _type_detail(choice_int_detail)
+	{
+
+	}
+	typed_string_desc::typed_string_desc(const typed_string_desc::choice_str_detail_t& choice_str_detail):
+		_type(basic_value_type::choice_str), _type_detail(choice_str_detail)
+	{
+
+	}
 	typed_string_desc::typed_string_desc(const typed_string_desc::list_detail_t& list_detail):
 		_type(basic_value_type::list), _type_detail(list_detail)
 	{
 
 	}
-	typed_string_desc::typed_string_desc(const typed_string_desc::ref_detail_t& ref_detail)
-		:_type(basic_value_type::ref_id), _type_detail(ref_detail)
-	{
 
-	}
 
 	ostream& operator<<(ostream& output_stream, const typed_string_desc& cur_type)
 	{
@@ -336,7 +394,8 @@ namespace spiritsaway::container{
 			{basic_value_type::number_float, "float"},
 			{basic_value_type::number_double, "double"},
 			{basic_value_type::list, "list"},
-			{basic_value_type::ref_id, "ref"},
+			{basic_value_type::choice_int, "choice_int"},
+			{basic_value_type::choice_str, "choice_str"},
 			{basic_value_type::tuple, "tuple"},
 		};
 		auto temp_iter = type_to_string.find(cur_type._type);
@@ -345,30 +404,54 @@ namespace spiritsaway::container{
 			return output_stream<<"invalid";
 		}
 		output_stream<<temp_iter->second;
-		if(cur_type._type == basic_value_type::ref_id)
+		if(cur_type._type == basic_value_type::choice_int)
 		{
-			auto temp_detail = std::get<typed_string_desc::ref_detail_t>(cur_type._type_detail);
-			string_view cur_worksheet, cur_ref_type;
-			std::tie(cur_worksheet, cur_ref_type) = temp_detail;
-			output_stream<<"(" << cur_worksheet<<", "<<cur_ref_type<<")";
+			auto temp_detail = std::get<typed_string_desc::choice_int_detail_t>(cur_type._type_detail);
+			auto [buffer_p, count] = temp_detail;
+			output_stream<<"(";
+			for(std::size_t i = 0 ; i< count; i++)
+			{
+				output_stream<<*(buffer_p + i);
+				if(i != count - 1)
+				{
+					output_stream<<", ";
+				}
+			}
+			output_stream<<")";
+			return output_stream;
+		}
+		else if(cur_type._type == basic_value_type::choice_str)
+		{
+			auto temp_detail = std::get<typed_string_desc::choice_str_detail_t>(cur_type._type_detail);
+			auto [buffer_p, count] = temp_detail;
+			output_stream <<"(";
+			for(std::size_t i = 0 ; i< count; i++)
+			{
+				output_stream<<*(buffer_p + i);
+				if(i != count - 1)
+				{
+					output_stream<<", ";
+				}
+			}
+			output_stream<<")";
 			return output_stream;
 		}
 		else if(cur_type._type == basic_value_type::tuple)
 		{
 			auto temp_detail = std::get<typed_string_desc::tuple_detail_t>(cur_type._type_detail);
 			output_stream<<"(";
-
-			for(std::uint32_t i = 0; i< temp_detail.first.size(); i++)
+			auto[p_vec, count, sep] = temp_detail;
+			for(std::uint32_t i = 0; i< count; i++)
 			{
-				output_stream<<*temp_detail.first[i];
-				if(i != temp_detail.first.size() - 1)
+				output_stream<<*p_vec[i];
+				if(i != count - 1)
 				{
 					output_stream<<",";
 				}
 			}
-			if(temp_detail.second != ',')
+			if(sep != ',')
 			{
-				output_stream<<", "<< temp_detail.second; 
+				output_stream<<", "<< sep; 
 			}
 			output_stream<<")";
 			return output_stream;
@@ -436,17 +519,66 @@ namespace spiritsaway::container{
 				}
 			}
 				
-			case basic_value_type::ref_id:
+			case basic_value_type::choice_int:
 			{
 				if(cur._type_detail.index() != other._type_detail.index())
 				{
 					return false;
 				}
-				auto cur_detail = std::get<typed_string_desc::ref_detail_t>(cur._type_detail);
-				auto other_detail = std::get<typed_string_desc::ref_detail_t>(other._type_detail);
-				return cur_detail == other_detail;
+				auto [cur_buffer, cur_count] = std::get<typed_string_desc::choice_int_detail_t>(cur._type_detail);
+				auto [other_buffer, other_count] = std::get<typed_string_desc::choice_int_detail_t>(other._type_detail);
+				if(cur_count != other_count)
+				{
+					return false;
+				}
+				for(std::size_t i = 0; i< cur_count; i++)
+				{
+					bool found = false;
+					for(std::size_t j = 0; j < cur_count; j++)
+					{
+						if(cur_buffer[i] == other_buffer[j])
+						{
+							found = true;
+							break;
+						}
+					}
+					if(!found)
+					{
+						return false;
+					}
+				}
+				return true;
 			}
-				
+			case basic_value_type::choice_str:
+			{
+				if(cur._type_detail.index() != other._type_detail.index())
+				{
+					return false;
+				}
+				auto [cur_buffer, cur_count] = std::get<typed_string_desc::choice_str_detail_t>(cur._type_detail);
+				auto [other_buffer, other_count] = std::get<typed_string_desc::choice_str_detail_t>(other._type_detail);
+				if(cur_count != other_count)
+				{
+					return false;
+				}
+				for(std::size_t i = 0; i< cur_count; i++)
+				{
+					bool found = false;
+					for(std::size_t j = 0; j < cur_count; j++)
+					{
+						if(cur_buffer[i] == other_buffer[j])
+						{
+							found = true;
+							break;
+						}
+					}
+					if(!found)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
 			case basic_value_type::tuple:
 			{
 				if(cur._type_detail.index() != other._type_detail.index())
@@ -454,14 +586,17 @@ namespace spiritsaway::container{
 					return false;
 				}
 				auto cur_detail = std::get<typed_string_desc::tuple_detail_t>(cur._type_detail);
+				auto[cur_vec_p, cur_count, cur_sep] = cur_detail;
 				auto other_detail = std::get<typed_string_desc::tuple_detail_t>(other._type_detail);
-				if(cur_detail.first.size() != other_detail.first.size())
+				auto[other_vec_p, other_count, other_sep] = other_detail;
+				if (cur_count != other_count || cur_sep != other_sep)
 				{
 					return false;
 				}
-				for(std::uint32_t i = 0; i < cur_detail.first.size(); i++)
+				
+				for(std::uint32_t i = 0; i < cur_count; i++)
 				{
-					if(*cur_detail.first[i] == *other_detail.first[i])
+					if(*cur_vec_p[i] == *other_vec_p[i])
 					{
 						continue;
 					}
@@ -558,16 +693,17 @@ namespace spiritsaway::container{
 			{
 				return true;
 			}
-			auto cur_delimiter = cur_tuple_detail_opt.value().second;
-			if (std::find(pre_delimiter.cbegin(), pre_delimiter.cend(), cur_delimiter) != pre_delimiter.cend())
+			auto[vec_p, count, sep] = cur_tuple_detail_opt.value();
+			if (std::find(pre_delimiter.cbegin(), pre_delimiter.cend(), sep) != pre_delimiter.cend())
 			{
 				return true;
 			}
-			pre_delimiter.push_back(cur_delimiter);
-			for (const auto one_item : cur_tuple_detail_opt.value().first)
+			pre_delimiter.push_back(sep);
+			for (std::size_t i = 0; i < count; i++)
 			{
-				if (one_item->check_delimiter_conflict(pre_delimiter))
+				if (vec_p[i]->check_delimiter_conflict(pre_delimiter))
 				{
+
 					return true;
 				}
 			}

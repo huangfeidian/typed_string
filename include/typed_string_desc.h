@@ -23,7 +23,8 @@ namespace spiritsaway::container
 		number_float,//FLOAT
 		number_double,//DOUBLE
 		// complicated types
-		ref_id,// ref to one cell in one worksheet REF(WORKSHEET, str) ref(worksheet, int)
+		choice_int, // one value in selected interger choice_int(0,1,2) 
+		choice_str,// one value in slected strings choice_str(red, blue, green)
 		tuple,// TUPLE(FLOAT, STRING) tuple(float, float, float)
 		list,//LIST(FLOAT, 3) LIST(FLOAT, 0) LIST(TUPLE(FLOAT, STRING), 2) LIST(LIST(FLOAT, 3), 3)
 
@@ -31,17 +32,19 @@ namespace spiritsaway::container
 	
 	struct typed_string_desc
 	{
-		using ref_detail_t = std::pair<std::string_view, std::string_view>;
+		using choice_int_detail_t = std::pair<int*, std::uint32_t>;
+		using choice_str_detail_t = std::pair<std::string_view*, std::uint32_t>;
 		using list_detail_t = std::tuple<typed_string_desc*, std::uint32_t, char>;// detail_type length <seperator>
-		using tuple_detail_t = std::pair<std::vector<typed_string_desc*>, char>;//<type1, type2, type3> seperator
+		using tuple_detail_t = std::tuple<typed_string_desc**, std::uint32_t, char>;//<type1, type2, type3> seperator
 		basic_value_type _type;
-		std::variant<ref_detail_t, tuple_detail_t, list_detail_t> _type_detail;
+		std::variant<choice_int_detail_t, choice_str_detail_t, tuple_detail_t, list_detail_t> _type_detail;
 		typed_string_desc();
 		
 		typed_string_desc(basic_value_type in_type);
 		typed_string_desc(const tuple_detail_t& tuple_detail);
 		typed_string_desc(const list_detail_t& list_detail);
-		typed_string_desc(const ref_detail_t& ref_detail);
+		typed_string_desc(const choice_str_detail_t& choice_detail);
+		typed_string_desc(const choice_int_detail_t& choice_detail);
 		std::string to_string() const;
 		friend std::ostream& operator<<(std::ostream& output_stream, const typed_string_desc& cur_node);
 		static const typed_string_desc* get_basic_type_desc(basic_value_type in_type);
@@ -49,7 +52,8 @@ namespace spiritsaway::container
 		friend bool operator==(const typed_string_desc& cur, const typed_string_desc& other);
 		friend bool operator!=(const typed_string_desc& cur, const typed_string_desc& other);
 		std::optional<list_detail_t> get_list_detail_t() const;
-		std::optional<ref_detail_t> get_ref_detail_t() const;
+		std::optional<choice_str_detail_t> get_choice_str_detail_t() const;
+		std::optional<choice_int_detail_t> get_choice_int_detail_t() const;
 		std::optional<tuple_detail_t> get_tuple_detail_t() const;
 		typed_string_desc(const typed_string_desc& other) = delete;
 		typed_string_desc& operator=(const typed_string_desc& other) = delete;

@@ -34,8 +34,10 @@ namespace spiritsaway::container
 				return output_stream<<cur_value.v_float;
 			case basic_value_type::number_double:
 				return output_stream<<cur_value.v_double;
-			case basic_value_type::ref_id:
-				return output_stream<<cur_value.v_text;
+			case basic_value_type::choice_int:
+				return output_stream<<cur_value.v_int32;
+			case basic_value_type::choice_str:
+				return output_stream << cur_value.v_text;
 			case basic_value_type::string:
 				return output_stream<<cur_value.v_text;
 			case basic_value_type::list:
@@ -57,7 +59,7 @@ namespace spiritsaway::container
 			case basic_value_type::tuple:
 			{
 				auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(cur_value.type_desc->_type_detail);
-				char sep = cur_tuple_detail.second;
+				auto sep = std::get<2>(cur_tuple_detail);
 				output_stream<<"(";
 				int cur_size = cur_value.v_vec.size;
 				for(int i = 0;i<cur_size; i++)
@@ -130,18 +132,26 @@ namespace spiritsaway::container
 	{
 		v_double = in_value;
 	}
-	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, string_view in_value)
+	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, std::string_view in_value)
 		: type_desc(typed_string_desc::get_basic_type_desc(basic_value_type::string))
 		, arena(arena)
 	{
 		v_text = in_value;
 	}
+
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, string_view in_value)
 		: type_desc(in_type_desc)
 		, arena(arena)
-		, v_text(in_value)
 	{
+		v_text = in_value;
 	}
+	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, int in_value)
+		: type_desc(in_type_desc)
+		, arena(arena)
+	{
+		v_int32 = in_value;
+	}
+
 
 	arena_typed_value::arena_typed_value(const spiritsaway::memory::arena* arena, const typed_string_desc* in_type_desc, arena_typed_vec in_value)
 		: type_desc(in_type_desc)
@@ -157,39 +167,9 @@ namespace spiritsaway::container
 		{
 			return false;
 		}
-		if(*cur.type_desc!=(*other.type_desc))
+		if (cur.type_desc->_type != other.type_desc->_type)
 		{
-			// maybe one in ref 
-			if (cur.type_desc->_type == basic_value_type::ref_id || other.type_desc->_type == basic_value_type::ref_id)
-			{
-				if (cur.type_desc->_type == basic_value_type::ref_id && other.type_desc->_type == basic_value_type::ref_id)
-				{
-					return false;
-				}
-				else
-				{
-					if (!cur.v_text.empty() || !other.v_text.empty())
-					{
-						if (cur.v_text != other.v_text)
-						{
-							return false;
-						}
-						else
-						{
-							return true;
-						}
-					}
-					else
-					{
-						return cur.v_int32 == other.v_int32;
-					}
-
-				}
-			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 		switch(cur.type_desc->_type)
 		{
@@ -210,6 +190,10 @@ namespace spiritsaway::container
 			return cur.v_bool == other.v_bool;
 		case basic_value_type::number_float:
 			return cur.v_float == other.v_float;
+		case basic_value_type::choice_int:
+			return cur.v_int32 == other.v_int32;
+		case basic_value_type::choice_str:
+			return cur.v_text == other.v_text;
 		case basic_value_type::list:
 		case basic_value_type::tuple:
 		{
@@ -230,23 +214,6 @@ namespace spiritsaway::container
 				}
 			}
 			return true;
-		}
-		case basic_value_type::ref_id:
-		{
-			auto cur_ref_detail_opt = cur.type_desc->get_ref_detail_t();
-			if (!cur_ref_detail_opt)
-			{
-				return 0;
-			}
-			auto cur_ref_detail = cur_ref_detail_opt.value();
-			if (cur_ref_detail.second == "str")
-			{
-				return cur.v_text == other.v_text;
-			}
-			else
-			{
-				return cur.v_int32 == other.v_int32;
-			}
 		}
 			
 		default:
@@ -283,6 +250,10 @@ namespace spiritsaway::container
 			return std::hash<bool>()(s->v_bool);
 		case basic_value_type::number_float:
 			return std::hash<float>()(s->v_float);
+		case basic_value_type::choice_int:
+			return std::hash<int>()(s->v_int32);
+		case basic_value_type::choice_str:
+			return std::hash<std::string_view>()(s->v_text);
 		case basic_value_type::list:
 		case basic_value_type::tuple:
 		{
@@ -293,23 +264,6 @@ namespace spiritsaway::container
 				result_hash += operator()(s->v_vec.p_value[i]) / cur_size;
 			}
 			return result_hash;
-		}
-		case basic_value_type::ref_id:
-		{
-			auto cur_ref_detail_opt = s->type_desc->get_ref_detail_t();
-			if (!cur_ref_detail_opt)
-			{
-				return 0;
-			}
-			auto cur_ref_detail = cur_ref_detail_opt.value();
-			if (cur_ref_detail.second == "str")
-			{
-				return std::hash<std::string_view>()(s->v_text);
-			}
-			else
-			{
-				return std::hash<std::int32_t>()(s->v_int32);
-			}
 		}
 			
 		default:
@@ -338,7 +292,7 @@ namespace spiritsaway::container
 		{
 			return v_uint32;
 		}
-		else if(cur_type == basic_value_type::number_32)
+		else if(cur_type == basic_value_type::number_32 || cur_type == basic_value_type::choice_int)
 		{
 			if (v_int32 < 0)
 			{
@@ -360,7 +314,7 @@ namespace spiritsaway::container
 		{
 			return v_int32;
 		}
-		else if(cur_type == basic_value_type::number_u32)
+		else if(cur_type == basic_value_type::number_32 || cur_type == basic_value_type::choice_int)
 		{
 			if (v_uint32 > numeric_limits<uint32_t>::max() / 2)
 			{
@@ -442,14 +396,13 @@ namespace spiritsaway::container
 	template <>
 	optional<string_view> arena_typed_value::expect_simple_value<string_view>() const
 	{
-
-		if(v_text.empty())
+		if (type_desc->_type == basic_value_type::string || type_desc->_type == basic_value_type::choice_str)
 		{
-			return nullopt;
+			return v_text;
 		}
 		else
 		{
-			return v_text;
+			return std::nullopt;
 		}
 	}
 

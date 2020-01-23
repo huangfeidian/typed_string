@@ -169,37 +169,60 @@ namespace spiritsaway::container
 			{
 				return false;
 			}
-		case basic_value_type::ref_id:
+		case basic_value_type::choice_int:
 		{
-			auto cur_ref_detail = std::get<typed_string_desc::ref_detail_t>(node_type->_type_detail);
-			if (cur_ref_detail.second == "str"sv)
+			auto cur_choice_detail = std::get<typed_string_desc::choice_int_detail_t>(node_type->_type_detail);
+			auto[vec_p, count] = cur_choice_detail;
+
+			auto opt_value = cast_string_view<std::int32_t>(text);
+			if (!opt_value)
 			{
-				new(result) arena_typed_value(&arena, node_type, text);
-				return true;
+				return false;
 			}
-			else
+			auto temp_value = opt_value.value();
+			for (std::size_t i = 0; i < count; i++)
 			{
-				new(result) arena_typed_value(&arena, static_cast<uint64_t>(current_double_value.value()));
-				return true;
+				if (vec_p[i] == temp_value)
+				{
+					new(result) arena_typed_value(&arena, node_type, temp_value);
+					return true;
+				}
 			}
+			return false;
+			
+		}
+		case basic_value_type::choice_str:
+		{
+			auto cur_choice_detail = std::get<typed_string_desc::choice_str_detail_t>(node_type->_type_detail);
+			auto[vec_p, count] = cur_choice_detail;
+			auto temp_value = strip_blank(text);
+			for (std::size_t i = 0; i < count; i++)
+			{
+				if (vec_p[i] == temp_value)
+				{
+					new(result) arena_typed_value(&arena, node_type, temp_value);
+					return true;
+				}
+			}
+			return false;
 		}
 		case basic_value_type::tuple:
 		{
 			auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(node_type->_type_detail);
-			char sep = cur_tuple_detail.second;
-			auto type_list = cur_tuple_detail.first;
+			auto[type_vec_p, count, sep] = cur_tuple_detail;
+
 			text = strip_parenthesis(text);
 			auto tokens = split_string(text, sep);
-			if (tokens.size() != type_list.size())
+			if (tokens.size() != count)
 			{
 				return false;
 			}
 			vector<arena_typed_value *> sub_values;
-			for (std::uint32_t i = 0; i < type_list.size(); i++)
+			for (std::uint32_t i = 0; i < count; i++)
 			{
 				arena_typed_value* temp_result = arena.get<arena_typed_value>(1);
 				temp_result->~arena_typed_value();
-				auto cur_value = parse_value_with_type(type_list[i], tokens[i], *temp_result);
+				auto cur_value = parse_value_with_type(type_vec_p[i], tokens[i], *temp_result);
 				if (!cur_value)
 				{
 					return false;
