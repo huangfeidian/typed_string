@@ -388,7 +388,7 @@ namespace spiritsaway::container{
 			{basic_value_type::string, "string"},
 			{basic_value_type::number_bool, "bool"},
 			{basic_value_type::number_u32, "uint32"},
-			{basic_value_type::number_32, "int32"},
+			{basic_value_type::number_32, "int"},
 			{basic_value_type::number_64, "int64"},
 			{basic_value_type::number_u64, "uint64"},
 			{basic_value_type::number_float, "float"},
