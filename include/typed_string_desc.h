@@ -45,6 +45,8 @@ namespace spiritsaway::container
 		typed_string_desc(const list_detail_t& list_detail);
 		typed_string_desc(const choice_str_detail_t& choice_detail);
 		typed_string_desc(const choice_int_detail_t& choice_detail);
+		typed_string_desc(const std::vector<int>& choice_values);
+		typed_string_desc(const std::vector<std::string_view>& choice_values);
 		std::string to_string() const;
 		friend std::ostream& operator<<(std::ostream& output_stream, const typed_string_desc& cur_node);
 		static const typed_string_desc* get_basic_type_desc(basic_value_type in_type);

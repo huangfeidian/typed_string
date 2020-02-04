@@ -379,6 +379,34 @@ namespace spiritsaway::container{
 	{
 
 	}
+	typed_string_desc::typed_string_desc(const std::vector<int>& choice_ints)
+		:_type(basic_value_type::choice_int)
+	{
+		auto int_buffer = typed_string_desc::memory_arena.get<int>(choice_ints.size());
+		for (std::size_t i = 0; i < choice_ints.size(); i++)
+		{
+			int_buffer[i] = choice_ints[i];
+		}
+		_type_detail = make_pair(int_buffer, choice_ints.size());
+	}
+	typed_string_desc::typed_string_desc(const std::vector<std::string_view>& choice_strs)
+		: _type(basic_value_type::choice_str)
+	{
+		std::vector<string_view> choice_values;
+		for (auto one_str: choice_strs)
+		{
+			auto p_str_view = typed_string_desc::memory_arena.get<char>(one_str.size());
+			std::copy(one_str.begin(), one_str.end(), p_str_view);
+			auto new_str_view = std::string_view(p_str_view, one_str.size());
+			choice_values.push_back(new_str_view);
+		}
+		auto sv_buffer = typed_string_desc::memory_arena.get<string_view>(choice_values.size());
+		for (std::size_t i = 0; i < choice_values.size(); i++)
+		{
+			sv_buffer[i] = choice_values[i];
+		}
+		_type_detail = make_pair(sv_buffer, choice_values.size());
+	}
 
 
 	ostream& operator<<(ostream& output_stream, const typed_string_desc& cur_type)
