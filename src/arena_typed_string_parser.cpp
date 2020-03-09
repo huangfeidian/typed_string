@@ -267,7 +267,7 @@ namespace spiritsaway::container
 			{
 				if (tokens.size() != list_size)
 				{
-					return nullptr;
+					return false;
 				}
 				sub_values.reserve(list_size);
 				for (auto one_token : tokens)
