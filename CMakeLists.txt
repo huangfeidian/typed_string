@@ -1,4 +1,4 @@
-
+﻿
 cmake_minimum_required(VERSION 3.8)
 PROJECT(typed_string)
 #dependency
@@ -27,7 +27,8 @@ target_link_libraries(parse_test ${CMAKE_PROJECT_NAME})
 foreach(p LIB INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
 	if(NOT IS_ABSOLUTE "${${var}}")
-		set(${var} "${CMAKE_INSTALL_PREFIX}/${p}")
+		string(TOLOWER ${p} lower_p)
+		set(${var} "${CMAKE_INSTALL_PREFIX}/${lower_p}")
 	endif()
 endforeach()
 
