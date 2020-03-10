@@ -1,6 +1,6 @@
-#include <string_util.h>
+﻿#include <string_util.h>
 #include <charconv>
-
+#include <sstream>
 
 namespace spiritsaway::string_util
 {
@@ -140,21 +140,44 @@ namespace spiritsaway::string_util
     template<>
     optional<float> cast_string_view<float>(string_view _text)
     {
-        float result;
-        if (auto[p, ec] = std::from_chars(_text.data(), _text.data() + _text.size(), result); ec == std::errc())
-        {
-            return result;
-        }
-        return nullopt;
+		// gcc and clang cant support from_chars to float or double
+        //float result;
+        //if (auto[p, ec] = std::from_chars(_text.data(), _text.data() + _text.size(), result); ec == std::errc())
+        //{
+        //    return result;
+        //}
+        //return nullopt;
+		std::istringstream cur_stream(_text.data(), _text.size());
+		float result;
+		cur_stream >> result;
+		if (cur_stream.fail() || !cur_stream.eof())
+		{
+			return std::nullopt;
+		}
+		else
+		{
+			return result;
+		}
     }
     template<>
     optional<double> cast_string_view<double>(string_view _text)
     {
-        double result;
+        /*double result;
         if (auto[p, ec] = std::from_chars(_text.data(), _text.data() + _text.size(), result); ec == std::errc())
         {
             return result;
         }
-        return nullopt;
+        return nullopt;*/
+		std::istringstream cur_stream(_text.data(), _text.size());
+		double result;
+		cur_stream >> result;
+		if (cur_stream.fail() || !cur_stream.eof())
+		{
+			return std::nullopt;
+		}
+		else
+		{
+			return result;
+		}
     }
 }

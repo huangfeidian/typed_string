@@ -1,4 +1,4 @@
-#include <arena_typed_string_parser.h>
+﻿#include <arena_typed_string_parser.h>
 #include <string_util.h>
 
 namespace
@@ -86,7 +86,7 @@ namespace spiritsaway::container
 		{
 			return false;
 		}
-		auto current_double_value = cast_string_view<double>(text);
+		
 		switch (node_type->_type)
 		{
 		case basic_value_type::comment:
@@ -110,65 +110,84 @@ namespace spiritsaway::container
 				return false;
 			}
 		case basic_value_type::number_32:
-			if (current_double_value.has_value())
+		{
+			auto cur_numer_value = string_util::cast_string_view<int>(text);
+			if (cur_numer_value.has_value())
 			{
-				new(result) arena_typed_value(&arena, static_cast<int32_t>(current_double_value.value()));
+				new(result) arena_typed_value(&arena, cur_numer_value.value());
 				return true;
 			}
 			else
 			{
 				return false;
 			}
+		}
+			
 		case basic_value_type::number_u32:
-			if (current_double_value.has_value())
+		{
+			auto cur_numer_value = string_util::cast_string_view<uint32_t>(text);
+			if (cur_numer_value.has_value())
 			{
-				new(result) arena_typed_value(&arena, static_cast<uint32_t>(current_double_value.value()));
+				new(result) arena_typed_value(&arena, cur_numer_value.value());
 				return true;
 			}
 			else
 			{
 				return false;
 			}
+		}
 		case basic_value_type::number_64:
-			if (current_double_value.has_value())
+		{
+			auto cur_numer_value = string_util::cast_string_view<int64_t>(text);
+			if (cur_numer_value.has_value())
 			{
-				new(result) arena_typed_value(&arena, static_cast<int64_t>(current_double_value.value()));
+				new(result) arena_typed_value(&arena, cur_numer_value.value());
 				return true;
 			}
 			else
 			{
 				return false;
 			}
+		}
 		case basic_value_type::number_u64:
-			if (current_double_value.has_value())
+		{
+			auto cur_numer_value = string_util::cast_string_view<uint64_t>(text);
+			if (cur_numer_value.has_value())
 			{
-				return new(result) arena_typed_value(&arena, static_cast<uint64_t>(current_double_value.value()));
+				new(result) arena_typed_value(&arena, cur_numer_value.value());
+				return true;
 			}
 			else
 			{
 				return false;
 			}
+		}
 		case basic_value_type::number_float:
-			if (current_double_value.has_value())
+		{
+			auto cur_numer_value = string_util::cast_string_view<float>(text);
+			if (cur_numer_value.has_value())
 			{
-				new(result) arena_typed_value(&arena, static_cast<float>(current_double_value.value()));
+				new(result) arena_typed_value(&arena, cur_numer_value.value());
 				return true;
 			}
 			else
 			{
 				return false;
 			}
+		}
 		case basic_value_type::number_double:
-			if (current_double_value.has_value())
+		{
+			auto cur_numer_value = string_util::cast_string_view<double>(text);
+			if (cur_numer_value.has_value())
 			{
-				new(result) arena_typed_value(&arena, current_double_value.value());
+				new(result) arena_typed_value(&arena, cur_numer_value.value());
 				return true;
 			}
-
 			else
 			{
 				return false;
 			}
+		}
 		case basic_value_type::choice_int:
 		{
 			auto cur_choice_detail = std::get<typed_string_desc::choice_int_detail_t>(node_type->_type_detail);
