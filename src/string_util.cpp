@@ -147,7 +147,7 @@ namespace spiritsaway::string_util
         //    return result;
         //}
         //return nullopt;
-		std::istringstream cur_stream(_text.data(), _text.size());
+		std::istringstream cur_stream(std::string(_text.data(), _text.size()));
 		float result;
 		cur_stream >> result;
 		if (cur_stream.fail() || !cur_stream.eof())
@@ -168,7 +168,7 @@ namespace spiritsaway::string_util
             return result;
         }
         return nullopt;*/
-		std::istringstream cur_stream(_text.data(), _text.size());
+		std::istringstream cur_stream(std::string(_text.data(), _text.size()));
 		double result;
 		cur_stream >> result;
 		if (cur_stream.fail() || !cur_stream.eof())
