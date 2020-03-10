@@ -16,7 +16,7 @@ namespace spiritsaway::string_util
 	template <typename T>
 	std::optional<T> cast_string_view(std::string_view _text)
 	{
-		return nullopt;
+		return std::nullopt;
 	}
 	template <>
 	std::optional<int> cast_string_view<int>(std::string_view _text);
