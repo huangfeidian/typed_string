@@ -16,7 +16,7 @@ namespace spiritsaway::memory
     class arena
 	{
 		const std::uint32_t buffer_page_size;
-		std::vector<char*> buffers;
+		std::vector<std::pair<char*, std::uint32_t>> buffers;
 		std::uint32_t cur_buffer_used = 0;
 	public:
 		arena(std::uint32_t page_size)
@@ -42,14 +42,14 @@ namespace spiritsaway::memory
 				auto result = static_cast<char*>(malloc(m_size));
 				if (buffers.empty())
 				{
-					buffers.push_back(result);
+					buffers.push_back(std::make_pair(result, m_size));
 					cur_buffer_used = buffer_page_size;
 					return result;
 				}
 				else
 				{
 					auto cur_buffer_size = buffers.size();
-					buffers.push_back(result);
+					buffers.push_back(std::make_pair(result, m_size));
 					std::swap(buffers[cur_buffer_size], buffers[cur_buffer_size - 1]);
 					return result;
 				}
@@ -59,14 +59,14 @@ namespace spiritsaway::memory
 			if (buffers.empty())
 			{
 				auto new_buffer_p = static_cast<char*>(malloc(buffer_page_size));
-				buffers.push_back(new_buffer_p);
+				buffers.push_back(std::make_pair(new_buffer_p, buffer_page_size));
 
 			}
 			if (cur_buffer_used + m_size > buffer_page_size)
 			{
 				auto new_buffer_p = static_cast<char*>(malloc(buffer_page_size));
 				cur_buffer_used = m_size;
-				buffers.push_back(new_buffer_p);
+				buffers.push_back(std::make_pair(new_buffer_p, buffer_page_size));
 				return new_buffer_p;
 
 			}
@@ -75,18 +75,23 @@ namespace spiritsaway::memory
 				auto result = cur_buffer_used;
 				cur_buffer_used += m_size;
 				auto cur_buffer_p = buffers.back();
-				return cur_buffer_p + result;
+				return cur_buffer_p.first + result;
 			}
 		}
 		std::uint32_t consumption() const
 		{
-			return buffer_page_size * buffers.size();
+			std::uint32_t result = 0;
+			for (const auto& one_page : buffers)
+			{
+				result += one_page.second;
+			}
+			return result;
 		}
 		void drop()
 		{
 			for (auto one_buffer : buffers)
 			{
-				free(one_buffer);
+				free(one_buffer.first);
 			}
 			buffers.clear();
 		}

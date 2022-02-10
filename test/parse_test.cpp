@@ -40,9 +40,11 @@ bool test_type_parse()
         "list(tuple(choice_int(0,1,2), choice_int(0,1,2), #), 3, ?)",
     };
 	bool failed = false;
+	memory::arena cur_arena(4 * 1024);
+
     for(const auto& i : valid_inputs)
     {
-        auto current_type = typed_string_desc::get_type_from_str(string_view(i));
+        auto current_type = typed_string_desc::get_type_from_str(&cur_arena, string_view(i));
 		if (current_type)
 		{
 			cout << *current_type << endl;
@@ -88,7 +90,7 @@ bool test_type_value_parse()
 	{
 		auto type_str = i.first;
 		auto value_strs = i.second;
-		auto current_type = typed_string_desc::get_type_from_str(string_view(type_str));
+		auto current_type = typed_string_desc::get_type_from_str(&cur_arena, string_view(type_str));
 		for (const auto & one_value : value_strs)
 		{
 			auto current_value = cur_parser.parse_value_with_type(current_type, string_view(one_value));
@@ -116,7 +118,6 @@ int main()
 	test_type_value_parse();
 	test_type_parse();
 	
-	typed_string_desc::clear_all_desc();
 
 	return 0;
 }

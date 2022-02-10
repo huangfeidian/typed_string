@@ -87,7 +87,7 @@ namespace spiritsaway::container
 			return false;
 		}
 		
-		switch (node_type->_type)
+		switch (node_type->m_type)
 		{
 		case basic_value_type::comment:
 			return false;
@@ -190,7 +190,7 @@ namespace spiritsaway::container
 		}
 		case basic_value_type::choice_int:
 		{
-			auto cur_choice_detail = std::get<typed_string_desc::choice_int_detail_t>(node_type->_type_detail);
+			auto cur_choice_detail = std::get<typed_string_desc::choice_int_detail_t>(node_type->m_type_detail);
 			auto[vec_p, count] = cur_choice_detail;
 
 			auto opt_value = cast_string_view<std::int32_t>(text);
@@ -212,7 +212,7 @@ namespace spiritsaway::container
 		}
 		case basic_value_type::choice_str:
 		{
-			auto cur_choice_detail = std::get<typed_string_desc::choice_str_detail_t>(node_type->_type_detail);
+			auto cur_choice_detail = std::get<typed_string_desc::choice_str_detail_t>(node_type->m_type_detail);
 			auto[vec_p, count] = cur_choice_detail;
 			auto temp_value = strip_blank(text);
 			for (std::size_t i = 0; i < count; i++)
@@ -227,7 +227,7 @@ namespace spiritsaway::container
 		}
 		case basic_value_type::tuple:
 		{
-			auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(node_type->_type_detail);
+			auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(node_type->m_type_detail);
 			auto[type_vec_p, count, sep] = cur_tuple_detail;
 
 			text = strip_parenthesis(text);
@@ -261,7 +261,7 @@ namespace spiritsaway::container
 		}
 		case basic_value_type::list:
 		{
-			auto cur_list_detail = std::get<typed_string_desc::list_detail_t>(node_type->_type_detail);
+			auto cur_list_detail = std::get<typed_string_desc::list_detail_t>(node_type->m_type_detail);
 			uint32_t list_size = std::get<uint32_t>(cur_list_detail);
 			char sep = std::get<char>(cur_list_detail);
 			auto unit_type = std::get<typed_string_desc *>(cur_list_detail);

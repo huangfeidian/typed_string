@@ -16,7 +16,7 @@ namespace spiritsaway::container
 	using namespace spiritsaway::string_util;
 	ostream& operator<<(ostream& output_stream, const arena_typed_value& cur_value)
 	{
-		switch(cur_value.type_desc->_type)
+		switch(cur_value.type_desc->m_type)
 		{
 			case basic_value_type::comment:
 				return output_stream<<cur_value.v_text;
@@ -42,7 +42,7 @@ namespace spiritsaway::container
 				return output_stream<<cur_value.v_text;
 			case basic_value_type::list:
 			{
-				auto cur_list_detail = std::get<typed_string_desc::list_detail_t>(cur_value.type_desc->_type_detail);
+				auto cur_list_detail = std::get<typed_string_desc::list_detail_t>(cur_value.type_desc->m_type_detail);
 				char sep = std::get<2>(cur_list_detail);
 				output_stream<<"(";
 				int cur_size = cur_value.v_vec.size;
@@ -58,7 +58,7 @@ namespace spiritsaway::container
 			}
 			case basic_value_type::tuple:
 			{
-				auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(cur_value.type_desc->_type_detail);
+				auto cur_tuple_detail = std::get<typed_string_desc::tuple_detail_t>(cur_value.type_desc->m_type_detail);
 				auto sep = std::get<2>(cur_tuple_detail);
 				output_stream<<"(";
 				int cur_size = cur_value.v_vec.size;
@@ -167,11 +167,11 @@ namespace spiritsaway::container
 		{
 			return false;
 		}
-		if (cur.type_desc->_type != other.type_desc->_type)
+		if (cur.type_desc->m_type != other.type_desc->m_type)
 		{
 			return false;
 		}
-		switch(cur.type_desc->_type)
+		switch(cur.type_desc->m_type)
 		{
 		case basic_value_type::comment:
 		case basic_value_type::string:
@@ -231,7 +231,7 @@ namespace spiritsaway::container
 		{
 			return 0;
 		}
-		switch(s->type_desc->_type)
+		switch(s->type_desc->m_type)
 		{
 		case basic_value_type::comment:
 		case basic_value_type::string:
@@ -287,7 +287,7 @@ namespace spiritsaway::container
 	template <>
 	optional<std::uint32_t> arena_typed_value::expect_simple_value<uint32_t>() const
 	{
-		auto cur_type = type_desc->_type;
+		auto cur_type = type_desc->m_type;
 		if(cur_type == basic_value_type::number_u32)
 		{
 			return v_uint32;
@@ -309,7 +309,7 @@ namespace spiritsaway::container
 	template <>
 	optional<std::int32_t> arena_typed_value::expect_simple_value<int32_t>() const
 	{
-		auto cur_type = type_desc->_type;
+		auto cur_type = type_desc->m_type;
 		if(cur_type == basic_value_type::number_32)
 		{
 			return v_int32;
@@ -335,7 +335,7 @@ namespace spiritsaway::container
 	template <>
 	optional<std::int64_t> arena_typed_value::expect_simple_value<int64_t>() const
 	{
-		if(type_desc->_type != basic_value_type::number_64)
+		if(type_desc->m_type != basic_value_type::number_64)
 		{
 			return nullopt;
 		}
@@ -347,7 +347,7 @@ namespace spiritsaway::container
 	template <>
 	optional<std::uint64_t> arena_typed_value::expect_simple_value<uint64_t>() const
 	{
-		if(type_desc->_type != basic_value_type::number_u64)
+		if(type_desc->m_type != basic_value_type::number_u64)
 		{
 			return nullopt;
 		}
@@ -359,7 +359,7 @@ namespace spiritsaway::container
 	template <>
 	optional<bool> arena_typed_value::expect_simple_value<bool>() const
 	{
-		if(type_desc->_type != basic_value_type::number_bool)
+		if(type_desc->m_type != basic_value_type::number_bool)
 		{
 			return nullopt;
 		}
@@ -372,7 +372,7 @@ namespace spiritsaway::container
 	template <>
 	optional<float> arena_typed_value::expect_simple_value<float>() const
 	{
-		if(type_desc->_type != basic_value_type::number_float)
+		if(type_desc->m_type != basic_value_type::number_float)
 		{
 			return nullopt;
 		}
@@ -384,7 +384,7 @@ namespace spiritsaway::container
 	template <>
 	optional<double> arena_typed_value::expect_simple_value<double>() const
 	{
-		if(type_desc->_type != basic_value_type::number_double)
+		if(type_desc->m_type != basic_value_type::number_double)
 		{
 			return nullopt;
 		}
@@ -396,7 +396,7 @@ namespace spiritsaway::container
 	template <>
 	optional<string_view> arena_typed_value::expect_simple_value<string_view>() const
 	{
-		if (type_desc->_type == basic_value_type::string || type_desc->_type == basic_value_type::choice_str)
+		if (type_desc->m_type == basic_value_type::string || type_desc->m_type == basic_value_type::choice_str)
 		{
 			return v_text;
 		}

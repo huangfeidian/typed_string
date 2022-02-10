@@ -36,8 +36,8 @@ namespace spiritsaway::container
 		using choice_str_detail_t = std::pair<std::string_view*, std::uint32_t>;
 		using list_detail_t = std::tuple<typed_string_desc*, std::uint32_t, char>;// detail_type length <seperator>
 		using tuple_detail_t = std::tuple<typed_string_desc**, std::uint32_t, char>;//<type1, type2, type3> seperator
-		basic_value_type _type;
-		std::variant<choice_int_detail_t, choice_str_detail_t, tuple_detail_t, list_detail_t> _type_detail;
+		basic_value_type m_type;
+		std::variant<choice_int_detail_t, choice_str_detail_t, tuple_detail_t, list_detail_t> m_type_detail;
 		typed_string_desc();
 		
 		typed_string_desc(basic_value_type in_type);
@@ -45,12 +45,12 @@ namespace spiritsaway::container
 		typed_string_desc(const list_detail_t& list_detail);
 		typed_string_desc(const choice_str_detail_t& choice_detail);
 		typed_string_desc(const choice_int_detail_t& choice_detail);
-		typed_string_desc(const std::vector<int>& choice_values);
-		typed_string_desc(const std::vector<std::string_view>& choice_values);
+		typed_string_desc(spiritsaway::memory::arena* typed_arena, const std::vector<int>& choice_values);
+		typed_string_desc(spiritsaway::memory::arena* typed_arena, const std::vector<std::string_view>& choice_values);
 		std::string to_string() const;
 		friend std::ostream& operator<<(std::ostream& output_stream, const typed_string_desc& cur_node);
 		static const typed_string_desc* get_basic_type_desc(basic_value_type in_type);
-		static const typed_string_desc* get_type_from_str(std::string_view type_string);
+		static const typed_string_desc* get_type_from_str(spiritsaway::memory::arena* typed_arena, std::string_view type_string);
 		friend bool operator==(const typed_string_desc& cur, const typed_string_desc& other);
 		friend bool operator!=(const typed_string_desc& cur, const typed_string_desc& other);
 		std::optional<list_detail_t> get_list_detail_t() const;
@@ -62,7 +62,5 @@ namespace spiritsaway::container
 		~typed_string_desc();
 		bool check_delimiter_conflict(std::vector<char>& pre_delimiter) const;
 		
-		static spiritsaway::memory::arena memory_arena;
-		static std::uint32_t clear_all_desc();
 	};
 }
