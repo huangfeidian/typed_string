@@ -94,6 +94,7 @@ namespace spiritsaway::memory
 				free(one_buffer.first);
 			}
 			buffers.clear();
+			cur_buffer_used = 0;
 		}
         ~arena()
         {
