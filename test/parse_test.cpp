@@ -104,7 +104,6 @@ bool test_type_value_parse()
 				failed = true;
 				return false;
 			}
-			
 		}
 		
 	}

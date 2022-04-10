@@ -2,7 +2,8 @@
 #include <string_view>
 #include <variant>
 #include <optional>
-
+#include <array>
+#include <vector>
 #include "memory_arena.h"
 #include "typed_string_desc.h"
 
@@ -148,7 +149,7 @@ namespace spiritsaway::container
 			{
 				return std::nullopt;
 			}
-			result[i].push_back(temp_opt.value());
+			result[i] = std::move(temp_opt.value());
 		}
 		return result;
 	}
