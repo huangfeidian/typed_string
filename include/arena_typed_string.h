@@ -59,7 +59,7 @@ namespace spiritsaway::container
 		template <typename... args>
 		std::optional<std::tuple<args ...>> expect_tuple_value() const;
 		template <typename T>
-		bool expect_value(T& dest)
+		bool expect_value(T& dest) const
 		{
 			std::optional<T> temp_result = expect_value<T>();
 			if (!temp_result)
