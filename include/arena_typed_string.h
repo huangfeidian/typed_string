@@ -54,6 +54,18 @@ namespace spiritsaway::container
 		std::optional<T> expect_value() const;
 		template <typename... args>
 		std::optional<std::tuple<args ...>> expect_tuple_value() const;
+		template <typename T>
+		bool get_value(T& dest)
+		{
+			std::optional<T> temp_result = expect_value<T>();
+			if (!temp_result)
+			{
+				return false;
+			}
+			dest = temp_result.value();
+			return true;
+			
+		}
 
 	private:
 		template<typename T> struct deduce_type{};
