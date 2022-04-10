@@ -53,7 +53,7 @@ namespace spiritsaway::container
 		std::optional<T> expect_simple_value() const;
 		template <typename T>
 		std::optional<T> expect_value() const;
-		template <typename T, std::uint32_t N>
+		template <typename T, std::size_t N>
 		std::optional<std::array<T, N>> expect_array_value() const;
 		template <typename T>
 		std::optional<std::vector<T>> expect_vec_value() const;
@@ -79,7 +79,7 @@ namespace spiritsaway::container
 		{
 			return expect_simple_value<T>();
 		}
-		template <typename T, std::uint32_t N>
+		template <typename T, std::size_t N>
 		auto expect_value_dispatch(deduce_type<std::array<T, N>>) const
 		{
 			return expect_array_value<T, N>();
@@ -130,7 +130,7 @@ namespace spiritsaway::container
 		return std::make_tuple(std::get<arg_idx>(temp_result).value()...);
 
 	}
-	template<typename T, std::uint32_t N>
+	template<typename T, std::size_t N>
 	std::optional<std::array<T, N>> arena_typed_value::expect_array_value() const
 	{
 		if (N != v_vec.size)
