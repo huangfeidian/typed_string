@@ -159,7 +159,7 @@ namespace spiritsaway::container
 		std::vector<T> result;
 		if (v_vec.size == 0)
 		{
-			return std::result;
+			return std::nullopt;
 		}
 
 		result.reserve(v_vec.size);
