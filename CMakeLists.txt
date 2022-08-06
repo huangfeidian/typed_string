@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
 endif(MSVC)
 
 
+FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 
@@ -20,7 +21,7 @@ FILE(GLOB_RECURSE TYPED_STRING_SRC_LIST ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 add_library(${CMAKE_PROJECT_NAME} ${TYPED_STRING_SRC_LIST})
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC $<INSTALL_INTERFACE:include>)
-
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
 add_executable(parse_test ${CMAKE_SOURCE_DIR}/test/parse_test.cpp)
 target_link_libraries(parse_test ${CMAKE_PROJECT_NAME})
 
