@@ -73,7 +73,7 @@ namespace
 		}
 		case basic_value_type::number_float:
 		{
-			return cur_value.is_number_float();
+			return cur_value.is_number();
 		}
 		default:
 			return false;
