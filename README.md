@@ -1,26 +1,22 @@
 # typed_string
 一个带有格式说明的异构容器，可以与字符串相互转换。
 ## typed_string_desc
-`typed_string_desc` 就是字符串的类型描述， 支持如下几种类型：
-1. `comment` 注释类型 就是简单的string 但是不参与值类型表示
-2. `str` 字符串类型 
-3. `bool` bool值类型 取值要么是1 要么是0
-4. `uint32` 无符号32位整数
-5. `int` 带符号32位整数
-6. `uint64` 无符号64位整数
-7. `int64` 带符号64位整数
-8. `float` 单精度浮点数
-9. `double` 双精度浮点数
-10. `choice_int` 整数枚举类型，规定可以取的int值列表，`choice_int(1, 2, 3)`代表符合这个schema的值一定是1，2，3这三个整数中的一个
-11. `choice_str` 字符串枚举类型，规定可以取的str值列表，`choice_str(false,true)` 代表符合这个schema的值一定是false true中的其中一个
-12. `list` 列表类型 可以包含有限个或者无限个同类型的值，值之间可以指定分隔符，默认分隔符为逗号。
-    1. `list(int, 3)` 代表三个int，
-    2. `list(str, 4, #)` 代表四个以#相分割的字符串
-    3. `list(int, 0)` 代表不确定个数的int值，以逗号相分割
-13. `tuple` 元组类型， 可以包含有限个不同类型的值，值之间可以指定分割符
-    1. `tuple(int, str) `两个元素的元组，一个是整数，一个是字符串，两个值之间用逗号分隔
-    2. `tuple(int, int, str)` 三元元素的元组，头两个是整数，最后一个是字符串， 值之间用逗号分隔
-    3. `tuple(str, str, #)` 两个字符串组成的元组，分隔符为#
+`typed_string_desc` 就是字符串的类型描述， 支持如下几种基础类型：
+1. `str` 字符串类型 
+2. `bool` bool值类型 取值要么是1 要么是0
+3. `uint` 无符号整数
+4. `int` 带符号整数
+5. `float` 浮点数
+
+然后对于基础类型，我们可以增加他的取值范围限定，方式为`{"xxx": [a, b, c]}`,这里的xxx就是基础类型名字， 而`a,b,c`则是可以供选择的值，其类型为`xxx`:
+1. `{"int": [1, 2]}` 
+2. `{"str": ["A", "B", "C"]}`
+3. `{"float": [1.0, 2.0]}`
+
+在这些基础类型之上我们提供了两种组合类型：
+1. `tuple`类型，可以理解为结构体，声明方式为`[A, B, C]`, 这里的`A,B,C`数量为任意多个，且每个元素都是一个有效的`typed_string_desc`,例子`["float", "int", {"int": [1, 2]}]`
+2. `list`类型，可以理解为数组， 声明方式为`[A, n]`，这里的`A`是一个有效的`typed_string_desc`,而`n`是一个非负整数，表示数组的大小， 如果`n==0`，则表明是一个不限制大小的数组，例子`["int", 2], [["int", "float"], 0]`
+
 
 这里的list和tuple是可以嵌套其他类型的，有如下例子:
 1. `list(choice_int(0,1,2), 3)`
@@ -42,45 +38,9 @@ struct typed_string_desc
 
 对于更多的`typed_string_desc`的例子参见`test`目录下的`parse_test.cpp`里的测试样例
 
-## typed_string_value
-`typed_string_value`是带`schema`的异构值类型，它可以在特定`schema`的指导下从字符串中`parse`出来，也可以转换为字符串。
-为了内存管理方便，这里我们定义了一个`arena_typed_string`来作为`typed_string_value`的具体载体。
-```c++
-struct arena_typed_vec
-{
-    arena_typed_value** p_value;
-    std::uint32_t size;
-};
-class arena_typed_value
-{
-public:
-    
-    const typed_string_desc* type_desc;
-    const spiritsaway::memory::arena* arena;
-    union {
-        bool v_bool;
-        std::uint32_t v_uint32; 
-        std::int32_t v_int32;
-        std::uint64_t v_uint64;
-        std::int64_t v_int64;
-        float v_float;
-        double v_double;
-        std::string_view v_text;
-        arena_typed_vec v_vec; 
-    };
-}
-```
-这里的`memory::arena`负责构造`arena_typed_value`时的内存分配，只分配，不释放，要释放的时候需要所有一起都释放掉。
-在这个`arena_typed_value`上，我们提供了几个转换函数，来获取所期待的类型的值：
 
-```c++
-template <typename T> 
-std::optional<T> expect_simple_value() const;
-template <typename T>
-std::optional<T> expect_value() const;
-template <typename... args>
-std::optional<std::tuple<args ...>> expect_tuple_value() const;
-```
+
+
 
 ## 安装与使用
 当前项目支持`cmake`的包管理，安装的时候只需要如下几步：
