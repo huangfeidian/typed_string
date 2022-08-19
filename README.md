@@ -18,24 +18,6 @@
 2. `list`类型，可以理解为数组， 声明方式为`[A, n]`，这里的`A`是一个有效的`typed_string_desc`,而`n`是一个非负整数，表示数组的大小， 如果`n==0`，则表明是一个不限制大小的数组，例子`["int", 2], [["int", "float"], 0]`
 
 
-这里的list和tuple是可以嵌套其他类型的，有如下例子:
-1. `list(choice_int(0,1,2), 3)`
-2. `tuple(choice_str(true, false), bool)`
-3. `tuple(list(int, 3), bool, #)`
-嵌套多层的时候需要注意不同层级之间的分隔符不要冲突，如果冲突了，则会导致这个`schema`的`parse`失败。在多层`tuple,list`的情况下需要手工指定不同的分隔符。
-下面是`typed_string_desc`的基本结构体
-```c++
-struct typed_string_desc
-{
-    using choice_int_detail_t = std::pair<int*, std::uint32_t>;
-    using choice_str_detail_t = std::pair<std::string_view*, std::uint32_t>;
-    using list_detail_t = std::tuple<typed_string_desc*, std::uint32_t, char>;// detail_type length <seperator>
-    using tuple_detail_t = std::tuple<typed_string_desc**, std::uint32_t, char>;//<type1, type2, type3> seperator
-    basic_value_type _type;
-    std::variant<choice_int_detail_t, choice_str_detail_t, tuple_detail_t, list_detail_t> _type_detail;
-}
-```
-
 对于更多的`typed_string_desc`的例子参见`test`目录下的`parse_test.cpp`里的测试样例
 
 
