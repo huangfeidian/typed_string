@@ -61,7 +61,20 @@ namespace
 		}
 		case basic_value_type::number_bool:
 		{
-			return cur_value.is_boolean();
+			if (cur_value.is_boolean())
+			{
+				return true;
+			}
+			if (!cur_value.is_number_unsigned())
+			{
+				return false;
+			}
+			auto cur_bool_int = cur_value.get<std::uint64_t>();
+			if (cur_bool_int > 1)
+			{
+				return false;
+			}
+			return true;
 		}
 		case basic_value_type::number_uint:
 		{
