@@ -14,6 +14,7 @@ namespace spiritsaway::container
 
 	enum class basic_value_type
 	{
+		any,
 		str,
 		number_bool,//BOOL
 		number_uint,//UINT
@@ -36,6 +37,7 @@ namespace spiritsaway::container
 	public:
 		typed_string_desc() = delete;
 	public:
+		typed_string_desc(basic_value_type in_type);
 		typed_string_desc(basic_value_type in_type, const std::vector<json>& in_choice_values);
 		typed_string_desc(const std::vector<std::shared_ptr<const typed_string_desc>>& tuple_detail);
 		typed_string_desc(std::shared_ptr < const typed_string_desc> list_detail, std::uint32_t in_list_sz);

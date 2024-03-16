@@ -11,6 +11,7 @@ using namespace spiritsaway::container;
 bool test_type_parse()
 {
     vector<string> valid_inputs = {
+		"any",
         "int",
         "str",
         "bool",

@@ -7,6 +7,9 @@ namespace
 	{
 		switch (in_type)
 		{
+		case basic_value_type::any:
+			return "any";
+			break;
 		case basic_value_type::str:
 			return "str";
 			break;
@@ -34,6 +37,7 @@ namespace
 	std::optional<basic_value_type> str_to_value_type(std::string_view input)
 	{
 		static const std::unordered_map<std::string_view, basic_value_type> look_map = {
+			{"any", basic_value_type::any},
 			{"str", basic_value_type::str},
 			{"bool", basic_value_type::number_bool},
 			{"int", basic_value_type::number_int},
@@ -55,6 +59,10 @@ namespace
 	{
 		switch (cur_type)
 		{
+		case basic_value_type::any:
+		{
+			return true;
+		}
 		case basic_value_type::str:
 		{
 			return cur_value.is_string();
@@ -97,6 +105,14 @@ namespace
 }
 namespace spiritsaway::container
 {
+	typed_string_desc::typed_string_desc(basic_value_type in_type)
+		: m_type(in_type)
+		, m_choice_values({})
+		, m_list_sz(0)
+	{
+
+	}
+
 	typed_string_desc::typed_string_desc(basic_value_type in_type, const std::vector<json>& in_choice_values)
 		: m_type(in_type)
 		, m_choice_values(in_choice_values)
@@ -123,7 +139,7 @@ namespace spiritsaway::container
 	json typed_string_desc::encode() const
 	{
 		json result;
-		if (int(m_type) >= int(basic_value_type::str) && int(m_type) <= int(basic_value_type::number_float))
+		if (int(m_type) >= int(basic_value_type::any) && int(m_type) <= int(basic_value_type::number_float))
 		{
 			auto cur_type_name = value_type_to_str(m_type);
 			if (m_choice_values.empty())
