@@ -25,6 +25,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
 add_executable(parse_test ${CMAKE_CURRENT_SOURCE_DIR}/test/parse_test.cpp)
 target_link_libraries(parse_test ${PROJECT_NAME})
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  set(IS_TOPLEVEL_PROJECT TRUE)
+else()
+  set(IS_TOPLEVEL_PROJECT FALSE)
+endif()
+
+if(IS_TOPLEVEL_PROJECT)
+
 foreach(p LIB INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
 	if(NOT IS_ABSOLUTE "${${var}}")
@@ -53,3 +61,5 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PRO
 
 install(EXPORT ${PROJECT_NAME}Targets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+
+endif(IS_TOPLEVEL_PROJECT)
